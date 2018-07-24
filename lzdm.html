@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <link rel="stylesheet" href="font/iconfont.css">
+
+    <style>
+        /* 连载动漫 */
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        a {
+            text-decoration: none;
+            font-style: "微软雅黑";
+            color: #000;
+        }
+
+        ul,
+        li {
+            list-style: none;
+        }
+
+        /* 头部 */
+
+        header {
+            width: 100%;
+            height: 41px;
+            background-color: #f7f7f7;
+            display: flex;
+            align-items: center;
+            line-height: 41px;
+            position: relative;
+        }
+
+        header a {
+            height: 41px;
+            color: #000;
+            font: 14px "微软雅黑" bold;
+        }
+
+        header a span:first-child {
+            color: #f59b92;
+            font-weight: bold;
+            left: 10px;
+            font-size: 30px;
+            position: absolute;
+        }
+
+        header span:nth-child(2) {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+        }
+
+        /* 主题 */
+
+        .pic {
+            width: 100%;
+            height: 145px;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid #000;
+            padding: 5px;
+        }
+
+        .pic a img {
+            /* width: 100%; */
+            height: 125px;
+            width: 75px;
+        }
+
+        .content {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            justify-content: space-between;
+            margin-left: 8px;
+        }
+
+        .content a {
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        /* 固定头部 */
+
+        .fixedhead {
+            position: fixed;
+            top: 0;
+            z-index: 20;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- 头部 -->
+    <header id="top">
+        <a href="">
+            <span class="iconfont icon-back"></span>
+        </a>
+        <span>连载动漫</span>
+
+    </header>
+    <section>
+        <div id="pic" class="pic">
+            <div class="img">
+                <a href="">
+                    <img src="img/1.jpg" alt="">
+                </a>
+            </div>
+            <div class="content">
+                <a href="">Maho Girls 光之美少女! /魔法师光之美少女</a>
+                <p>2234</p>
+                <p>点22rf</p>
+            </div>
+        </div>
+
+    </section>
+</body>
+
+</html>
+<script src="jquery/jquery.min.js"></script>
+<script src="js/template-web.js"></script>
+<script type="text/html" id="tpllzdm">
+   {{each list value}}
+   <div class="pic"><a href="{{value.url}}"><img src="{{value.img}}" alt=""></a>
+   <div class="content">
+       <a href="">{{value.name}}</a>
+       <span>{{value.episode}}</span>
+       <span>{{value.updateTime}}</span>
+       <sapn>下载次数:{{value.downloadCount}}</sapn>
+   </div>
+</div>
+   {{/each}}
+</script>
+<script>
+    $.ajax({
+        url: "http://czdm.ittun.com/api/getlianzai",
+        type: "get",
+        datatype: "json",
+        success: function (obj) {
+            console.log(obj);
+            var html = template('tpllzdm', { list: obj });
+            $('section').html(html);
+        }
+    })
+    $('.icon-back').click(function (e) {
+        e = e || window.event;
+        e.preventDefault();
+        window.location.href = window.sessionStorage.getItem("url");
+        window.location.href = "index.html";
+    })
+    // 固定导航栏
+    window.onload = function () {
+        // 1.获得要操作的对象
+        var top = document.getElementById("top");
+        var pic = document.getElementById("pic");
+        // 2.给事件源注册事件
+        window.onscroll = function () {
+            // 当页面被滚动的时候，才会触发
+            var scrollTop = scroll().scrollTop  // 获取页面被卷去的高度
+            if (scrollTop > top.offsetHeight) {
+                // 让top固定起来
+                top.setAttribute('class', 'top fixedhead')   // 给main设置一个固定的类
+                pic.style.paddingTop = '41px'  // 给main加上一个内上填充
+            } else {
+                top.setAttribute('class', 'top')  // 给main设置一个固定的类
+                pic.style.paddingTop = '0px'    // 把之前添加的内填充给去掉
+            }
+        }
+        function scroll() {
+            return {
+                scrollTop: window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0,
+                scrollLeft: window.pageXOffset || document.documentElement.scrollLeft || document.body.scrollLeft || 0
+            }
+        }
+    }
+</script>

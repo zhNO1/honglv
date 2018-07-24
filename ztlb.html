@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="font/iconfont.css">
+
+    <title>Document</title>
+    <style>
+        /* 连载动漫 */
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        a {
+            text-decoration: none;
+            font-style: "微软雅黑";
+            color: #000;
+        }
+
+        ul,
+        li {
+            list-style: none;
+        }
+
+        /* 头部 */
+
+        header {
+            width: 100%;
+            height: 41px;
+            background-color: #f7f7f7;
+            display: flex;
+            align-items: center;
+            line-height: 41px;
+            position: relative;
+        }
+
+        header a {
+            height: 41px;
+            color: #000;
+            font: 14px "微软雅黑" bold;
+        }
+        header a span:first-child {
+            color: #f59b92;
+            font-weight: bold;
+            left: 10px;
+            font-size: 30px;
+            position: absolute;
+        }
+
+        header span:nth-child(2) {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+        }
+
+        section a img {
+            width: 100%;
+            height: 145px;
+            margin-top: 10px;
+        }
+
+        .pic {
+            padding: 10px;
+        }
+
+        .title {
+            color: gray;
+            padding-bottom: 10px;
+            border-bottom: 0.5px solid gray;
+        }
+
+        /* 固定头部 */
+
+        .fixedhead {
+            position: fixed;
+            top: 0;
+            z-index: 20;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- 头部 -->
+    <header id="top">
+        <a href="">
+            <span class="iconfont  icon-back"></span>
+        </a>
+        <span>专题列表</span>
+
+    </header>
+    <!--主体  -->
+    <section id="pic">
+        <!-- <a href=""><img src="img/1.jpg" alt=""></a>
+          <div class="title"> <span>风风光光</span></div> -->
+    </section>
+</body>
+
+</html>
+<script src="jquery/jquery.min.js"></script>
+<script src="js/template-web.js"></script>
+<script type="text/html" id="tplztlb">
+    {{each list value}}
+    <a href="{{value.url}}"><img src="{{value.img}}" alt=""></a>
+    <div class="title"><span>{{value.title}}</span></div>
+    {{/each}}
+</script>
+<script>
+    $.ajax({
+        url: "http://czdm.ittun.com/api/gettopics",
+        type: "get",
+        datatype: "json",
+        success: function (obj) {
+            // console.log(obj);
+            var html = template('tplztlb', { list: obj });
+            $('section').html(html);
+        }
+    })
+    $(".icon-back").click(function (e) {
+        e = e || window.event;
+        e.preventDefault();
+        window.location.href = window.sessionStorage.getItem("url");
+        window.location.href = "index.html";
+
+    })
+    // 固定导航栏
+    window.onload = function () {
+        // 1.获得要操作的对象
+        var top = document.getElementById("top");
+        var pic = document.getElementById("pic");
+        // 2.给事件源注册事件
+        window.onscroll = function () {
+            // 当页面被滚动的时候，才会触发
+            var scrollTop = scroll().scrollTop  // 获取页面被卷去的高度
+            if (scrollTop > top.offsetHeight) {
+                // 让top固定起来
+                top.setAttribute('class', 'top fixedhead')   // 给main设置一个固定的类
+                pic.style.paddingTop = '41px'  // 给main加上一个内上填充
+            } else {
+                top.setAttribute('class', 'top')  // 给main设置一个固定的类
+                pic.style.paddingTop = '0px'    // 把之前添加的内填充给去掉
+            }
+        }
+        function scroll() {
+            return {
+                scrollTop: window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0,
+                scrollLeft: window.pageXOffset || document.documentElement.scrollLeft || document.body.scrollLeft || 0
+            }
+        }
+    }
+    var totaldata = window.localStorage.getItem("data");
+    var dataStr = JSON.parse(totaldata);
+  if(dataStr){
+    var data1 = dataStr.data;
+  }
+    function doLoad(pageIndex, page, dataStr) {
+        $.ajax({
+            url: "http://czdm.ittun.com/api/gettopics",
+            type: "get",
+            datatype: "json",
+            success: function (obj) {
+                //所有的数据
+                var obj = {
+                    data: obj,
+                    pageSize: pageIndex,
+                    currentPage: page,
+                }
+                var alldata = JSON.stringify(obj);
+                window.localStorage.setItem("data", alldata);
+                //每一页显示的数据
+                var res = pagination(pageIndex, page, obj.data)
+                var str = ""
+                for (var i = 0; i < res.length; i++) {
+                    str += '<a href=""><img src="' + res[i].img + '" alt=""></a>' +
+                        '<div class="title"> <span>' + res[i].title + '</span></div>';
+                }
+                $('section').append(str);
+                var html = template("tplztlb", { list: res });
+                $('section').html(html);
+            }
+        })
+    }
+    doLoad(5, 1);
+    // 下拉分页事件
+    $(window).bind("scroll", function () {
+        // console.log("...");
+        //页面总高度
+        var scrollHeight = document.documentElement.scrollHeight || document.body.scrollHeight || 0;
+        //console.log(scrollHeight);
+        //可视区高度
+        var clientHeight = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight || 0;
+        //console.log(clientHeight);
+        //滚动条距离顶部的高度
+        var scrollTop = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0;
+        //console.log(scrollTop);
+        //如果滚动条的高度+可视区高度>=总高度
+        if (Math.ceil(scrollTop + clientHeight) >= scrollHeight) {
+            console.log(1111);
+            dataStr.currentPage++;
+            console.log(dataStr.currentPage);
+            //   doLoad(dataStr.pageSize,dataStr.currentPage,data1); 
+            var aaa = pagination(dataStr.pageSize, dataStr.currentPage, data1);
+            console.log(aaa);
+            var str = ""
+            for (var i = 0; i < aaa.length; i++) {
+                str += '<a href=""><img src="' + aaa[i].img + '" alt=""></a>' +
+                    '<div class="title"> <span>' + aaa[i].title + '</span></div>';
+            }
+            console.log(str);
+            $('section').append(str);
+
+        }
+    })
+    // pageSize：一页的总数
+    // currentPage：当前的页数
+    // skipNum：跳过的数量
+    // arr：数组
+    var pagination = function (pageSize, currentPage, arr) {
+        var skipNum = (currentPage - 1) * pageSize;
+        var newArr = (skipNum + pageSize >= arr.length) ? arr.slice(skipNum, arr.length) : arr.slice(skipNum, skipNum + pageSize);
+        return newArr;
+    }
+
+</script>

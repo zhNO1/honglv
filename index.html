@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="font/iconfont.css">
+    <link rel="stylesheet" href="css/index.css">
+    <link rel="stylesheet" href="swiper/css/swiper.min.css">
+    <title>Document</title>
+</head>
+
+<body>
+    <!-- 滑动遮罩层 -->
+    <!-- 头部 -->
+    <header id="top" class="top">
+        <a href="javascript:;">
+            <span class="iconfont icon-category"></span>
+        </a>
+        <span>红旅动漫</span>
+        <a href="javascript:;">
+            <span class="iconfont icon-search"></span>
+        </a>
+
+    </header>
+    <div class="list">
+        <ul>
+            <li>
+                <a class="lzdh" href="">连载动画
+                    <i class="iconfont  icon-more"></i>
+                </a>
+            </li>
+            <li>
+                <a class="ztlb" href="">专题列表
+                    <i class="iconfont  icon-more"></i>
+                </a>
+            </li>
+        </ul>
+    </div>
+    <!-- 轮播图 -->
+    <div class="banner">
+        <div class="swiper-container">
+            <div class="swiper-wrapper">
+                <!-- <div class="swiper-slide">
+                    <img src="img/1.jpg" alt="">
+                    <span>文字</span>
+                </div>
+                <div class="swiper-slide"><img src="img/2.jpg" alt="">
+                    <span>文字</span></div>
+                <div class="swiper-slide"> <imgs src="img/3.jpg" alt="">
+                    <span>文字</span>
+                </div>  -->
+            </div>
+            <!-- 如果需要分页器 -->
+            <div class="swiper-pagination"></div>
+            <!-- 如果需要导航按钮 -->
+            <!-- <div class="swiper-button-prev"></div>
+            <div class="swiper-button-next"></div> -->
+            <!-- 如果需要滚动条 -->
+            <div class="swiper-scrollbar"></div>
+        </div>
+    </div>
+    <!-- tab -->
+    <section id="main" class="main">
+        <ul class="main-tab">
+            <li>
+                <a href="">新增连载</a>
+            </li>|
+            <li>
+                <a href="">新增完结</a>
+            </li>|
+            <li>
+                <a href="">推荐连载</a>
+            </li>|
+            <li>
+                <a href="">推荐完结</a>
+            </li>
+        </ul>
+    </section>
+    <section id="pic" class="pic">
+        <ul class="pic-products">
+            <!--  <li>
+                <a href="">
+                    <img src="img/1.jpg" alt="" />
+                    <span class="decoration">描述</span>
+                    <span>推荐完结图片</span>
+                </a>
+            </li>
+          <li>
+                <a href="">
+                    <img src="img/1.jpg" alt="" />
+                    <span class="decoration">描述</span>
+                    <span>推荐完结图片</span>
+                </a>
+            </li>
+            <li>
+                <a href="">
+                    <img src="img/1.jpg" alt="" />
+                    <span class="decoration">描述</span>
+                    <span>推荐完结图片</span>
+                </a>
+            </li>
+            <li>
+                <a href="">
+                    <img src="img/1.jpg" alt="" />
+                    <span class="decoration">描述</span>
+                    <span>推荐完结图片</span>
+                </a>
+            </li> -->
+        </ul>
+    </section>
+</body>
+
+</html>
+<script src="jquery/jquery.min.js"></script>
+<script src="swiper/js/swiper.min.js"></script>
+<script src="js/index.js"></script>
+<script src="js/template-web.js"></script>
+<script type="text/html" id="tpl">
+    {{ each list value}}
+    <li> <a href="{{value.url}}"><img src="{{value.img}}" alt=""/>
+        <span class="decoration">{{value.update}}</span>
+        <span class="name">{{value.name}}</span>
+      </a></li>
+      {{/each }}
+</script>
+
+<script>
+    //轮播图
+    $.ajax({
+        url: "http://czdm.ittun.com/api/getlunbo",
+        type: "get",
+        datatype: "json",
+        success: function (obj) {
+            console.log(obj);
+            var div = "";
+            for (var i = 0; i < obj.length; i++) {
+                div += '<div class="swiper-slide">'
+                    + '<a href="' + obj[i].url + '"><img src="' + obj[i].img + '" alt=""></a>'
+                    + '<span>' + obj[i].title + '</span>'
+                    + '</div>';
+            }
+            $(".swiper-wrapper").html(div);
+            //轮播图
+            var mySwiper = new Swiper('.swiper-container', {
+                direction: 'horizontal',
+                loop: true,
+                autoplay: true,
+                observer: true,
+                // 如果需要分页器
+                pagination: {
+                    el: '.swiper-pagination',
+                },
+                // 如果需要前进后退按钮
+                navigation: {
+                    // nextEl: '.swiper-button-next',
+                    // prevEl: '.swiper-button-prev',
+                },
+
+                // 如果需要滚动条
+                scrollbar: {
+                    el: '.swiper-scrollbar',
+                },
+                //
+            })
+
+        }
+    })
+    //tab栏
+    //页面开始加载数据
+    $.ajax({
+        url: "http://czdm.ittun.com/api/gethometab/1",
+        type: "get",
+        datatype: "json",
+        success: function (res) {
+            console.log(res);
+            var html = template('tpl', { list: res });
+            $('.pic-products').html(html);
+        }
+    })
+    $(".main-tab li").click(function (e) {
+        e = e || window.event;
+        e.preventDefault();
+        //获取tab的索引
+        var index = $(this).index() + 1;
+        // console.log(index);
+        $(this).addClass('active').siblings("li").removeClass('active');
+        $.ajax({
+            url: "http://czdm.ittun.com/api/gethometab/" + index,
+            type: "get",
+            datatype: "json",
+            success: function (res) {
+                console.log(res);
+                var html = template('tpl', { list: res });
+                $('.pic-products').html(html);
+            }
+        })
+    })
+
+
+</script>
